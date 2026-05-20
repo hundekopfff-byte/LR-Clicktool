@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Love Repair Click Tool</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root {
+  --bg:#0f172a;
+  --panel:#111827;
+  --panel2:#1f2937;
+  --text:#f9fafb;
+  --muted:#94a3b8;
+  --accent:#60a5fa;
+  --border:#334155;
+}
+
+* {
+  box-sizing:border-box;
+}
+
+body {
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:linear-gradient(135deg,#020617,#0f172a);
+  color:var(--text);
+}
+
+header {
+  padding:22px 28px;
+  border-bottom:1px solid var(--border);
+  background:rgba(15,23,42,.96);
+}
+
+header h1 {
+  margin:0 0 6px;
+}
+
+header p {
+  margin:0;
+  color:var(--muted);
+}
+
+.layout {
+  display:grid;
+  grid-template-columns:300px 1fr;
+  min-height:calc(100vh - 84px);
+}
+
+nav {
+  border-right:1px solid var(--border);
+  background:#07101f;
+  padding:16px;
+  overflow-y:auto;
+}
+
+.nav-btn {
+  width:100%;
+  margin-bottom:10px;
+  padding:12px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:#111827;
+  color:white;
+  cursor:pointer;
+  text-align:left;
+}
+
+.nav-btn.active {
+  border-color:var(--accent);
+  background:#172554;
+}
+
+main {
+  padding:24px;
+}
+
+.card {
+  background:rgba(17,24,39,.95);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:20px;
+  margin-bottom:18px;
+}
+
+.script {
+  white-space:pre-wrap;
+  background:#020617;
+  border-left:4px solid var(--accent);
+  padding:16px;
+  border-radius:12px;
+  line-height:1.55;
+}
+
+.grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:14px;
+}
+
+.path {
+  background:var(--panel2);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:14px;
+}
+
+.good { border-color:#16a34a; }
+.warn { border-color:#f59e0b; }
+.bad { border-color:#ef4444; }
+
+textarea, input {
+  width:100%;
+  background:#020617;
+  color:white;
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:12px;
+}
+
+textarea {
+  min-height:140px;
+  resize:vertical;
+}
+
+.top-tools {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+  margin-bottom:18px;
+}
+
+button {
+  border:none;
+  padding:12px 14px;
+  border-radius:12px;
+  cursor:pointer;
+  font-weight:bold;
+}
+
+.main-btn {
+  background:var(--accent);
+  color:#02111f;
+}
+
+.secondary-btn {
+  background:#111827;
+  border:1px solid var(--border);
+  color:white;
+}
+
+.flex {
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.status {
+  color:#93c5fd;
+  font-size:13px;
+  margin-top:10px;
+}
+
+@media(max-width:850px) {
+  .layout {
+    grid-template-columns:1fr;
+  }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Love Repair Click Tool</h1>
+  <p>Cloud-Sync · Setter → Closer Übergabe · Supabase verbunden</p>
+</header>
+
+<div class="layout">
+  <nav id="nav"></nav>
+  <main id="main"></main>
+</div>
+
+<script>
+
+const supabaseClient = supabase.createClient(
+  "https://crtyrybrbjoqasyikntl.supabase.co",
+  "sb_publishable_aCJP6vi1Iacy2c26t57sOA_-Gc6C2KE"
+);
+
+const phases = [
+  {
+    title:"Phase 1 — Begrüßung + Frame",
+    goal:"Weich öffnen und den Rahmen setzen.",
+    script:"Hey [NAME], [DEIN NAME] hier aus dem Love Repair Team. Passt's grade?",
+    paths:[
+      {label:"Lead hat Zeit", type:"good", text:"Weiter zu Phase 2."},
+      {label:"Lead hat keine Zeit", type:"warn", text:"Termin verschieben."}
+    ]
+  },
+  {
+    title:"Phase 2 — Wunsch 1–10",
+    goal:"Wunsch und Ambivalenz prüfen.",
+    script:"Wie sehr willst du sie/ihn wirklich zurück auf einer Skala von 1–10?",
+    paths:[
+      {label:"9–10", type:"good", text:"Klarer Wunsch."},
+      {label:"5–8", type:"warn", text:"Block liegt davor."},
+      {label:"1–4", type:"bad", text:"Disqualifizieren prüfen."}
+    ]
+  },
+  {
+    title:"Phase 3 — Informationsgewinnung",
+    goal:"Beziehungsdaten sammeln.",
+    script:"Wie lange wart ihr zusammen? Seit wann getrennt?",
+    paths:[
+      {label:"Frische Trennung", type:"warn", text:"Emotionale Kurzschlussreaktionen prüfen."},
+      {label:"Neue Person", type:"bad", text:"Nicht dramatisieren."}
+    ]
+  }
+];
+
+let current = 0;
+let currentLeadId = null;
+
+function safe(v) {
+  return String(v || "")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;");
+}
+
+function renderNav() {
+  const nav = document.getElementById("nav");
+
+  nav.innerHTML = phases.map((p,i)=>`
+    <button class="nav-btn ${i===current ? 'active' : ''}" onclick="goTo(${i})">
+      ${p.title}
+    </button>
+  `).join("");
+}
+
+async function renderMain() {
+  const p = phases[current];
+
+  let existingNote = "";
+
+  if(currentLeadId) {
+    const { data } = await supabaseClient
+      .from("lead_notes")
+      .select("*")
+      .eq("lead_id", currentLeadId)
+      .eq("phase_number", current)
+      .maybeSingle();
+
+    if(data?.note) {
+      existingNote = data.note;
+    }
+  }
+
+  const main = document.getElementById("main");
+
+  main.innerHTML = `
+    <div class="card">
+      <div class="top-tools">
+        <div>
+          <label>Lead Name</label>
+          <input id="leadName" placeholder="z.B. Sarah / Kevin" />
+        </div>
+
+        <div>
+          <label>Setter Name</label>
+          <input id="setterName" placeholder="Dein Name" />
+        </div>
+      </div>
+
+      <div class="flex">
+        <button class="main-btn" onclick="createLead()">Lead speichern</button>
+        <button class="secondary-btn" onclick="copyNotes()">Closer-Übergabe kopieren</button>
+      </div>
+
+      <div class="status" id="saveStatus">
+        ${currentLeadId ? "Lead verbunden mit Supabase." : "Noch kein Lead gespeichert."}
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>${safe(p.title)}</h2>
+      <p>${safe(p.goal)}</p>
+    </div>
+
+    <div class="card">
+      <h3>Skript</h3>
+      <div class="script">${safe(p.script)}</div>
+    </div>
+
+    <div class="card">
+      <h3>Klick-Pfade</h3>
+      <div class="grid">
+        ${p.paths.map(path=>`
+          <div class="path ${path.type}">
+            <h4>${safe(path.label)}</h4>
+            <div class="script">${safe(path.text)}</div>
+          </div>
+        `).join("")}
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Notizen</h3>
+      <textarea id="phaseNote">${safe(existingNote)}</textarea>
+
+      <div class="flex" style="margin-top:14px;">
+        <button class="main-btn" onclick="saveCurrentNote()">Notiz speichern</button>
+        <button class="secondary-btn" onclick="nextPhase()">Weiter →</button>
+      </div>
+    </div>
+  `;
+}
+
+async function createLead() {
+
+  const leadName = document.getElementById("leadName").value.trim();
+  const setterName = document.getElementById("setterName").value.trim();
+
+  if(!leadName) {
+    alert("Lead Name fehlt.");
+    return;
+  }
+
+  const { data, error } = await supabaseClient
+    .from("leads")
+    .insert([{
+      name:leadName,
+      setter:setterName
+    }])
+    .select()
+    .single();
+
+  if(error) {
+    console.error(error);
+    alert("Fehler beim Speichern.");
+    return;
+  }
+
+  currentLeadId = data.id;
+
+  document.getElementById("saveStatus").innerText =
+    "Lead online gespeichert.";
+}
+
+async function saveCurrentNote() {
+
+  if(!currentLeadId) {
+    alert("Bitte zuerst Lead speichern.");
+    return;
+  }
+
+  const note = document.getElementById("phaseNote").value;
+
+  const p = phases[current];
+
+  const { error } = await supabaseClient
+    .from("lead_notes")
+    .upsert([{
+      lead_id:currentLeadId,
+      phase_number:current,
+      phase_title:p.title,
+      note:note
+    }], {
+      onConflict:"lead_id,phase_number"
+    });
+
+  if(error) {
+    console.error(error);
+    alert("Fehler beim Speichern.");
+    return;
+  }
+
+  document.getElementById("saveStatus").innerText =
+    "Notiz online gespeichert.";
+}
+
+async function copyNotes() {
+
+  if(!currentLeadId) {
+    alert("Noch kein Lead.");
+    return;
+  }
+
+  const { data } = await supabaseClient
+    .from("lead_notes")
+    .select("*")
+    .eq("lead_id", currentLeadId)
+    .order("phase_number");
+
+  let text = "CLOSER ÜBERGABE\n\n";
+
+  data.forEach(item => {
+    text += item.phase_title + "\n";
+    text += item.note + "\n\n";
+  });
+
+  await navigator.clipboard.writeText(text);
+
+  alert("Closer-Übergabe kopiert.");
+}
+
+function goTo(i) {
+  current = i;
+  renderNav();
+  renderMain();
+}
+
+function nextPhase() {
+  if(current < phases.length - 1) {
+    current++;
+    renderNav();
+    renderMain();
+  }
+}
+
+renderNav();
+renderMain();
+
+</script>
+</body>
+</html>
