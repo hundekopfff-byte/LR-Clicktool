@@ -1,0 +1,1652 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Love Repair Click Tool CRM</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root {
+  --bg:#0f172a;
+  --panel:#111827;
+  --panel2:#1f2937;
+  --text:#f9fafb;
+  --muted:#94a3b8;
+  --accent:#60a5fa;
+  --border:#334155;
+  --green:#22c55e;
+  --yellow:#f59e0b;
+  --red:#ef4444;
+}
+* { box-sizing:border-box; }
+body {
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:linear-gradient(135deg,#020617,#0f172a);
+  color:var(--text);
+}
+header {
+  padding:20px 24px;
+  border-bottom:1px solid var(--border);
+  background:rgba(15,23,42,.96);
+}
+header h1 { margin:0 0 6px; font-size:28px; }
+header p { margin:0; color:var(--muted); }
+.layout {
+  display:grid;
+  grid-template-columns:280px minmax(0, 1fr) 430px;
+  min-height:calc(100vh - 83px);
+}
+aside {
+  border-right:1px solid var(--border);
+  background:#07101f;
+  padding:14px;
+  overflow-y:auto;
+}
+main {
+  padding:24px;
+  padding-bottom:260px;
+  min-width:0;
+  overflow-x:hidden;
+}
+.card {
+  background:rgba(17,24,39,.95);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:18px;
+  margin-bottom:18px;
+}
+.sidebar-title {
+  font-size:14px;
+  color:#bfdbfe;
+  margin:6px 0 10px;
+  font-weight:bold;
+}
+.phase-btn, .lead-btn {
+  width:100%;
+  margin-bottom:8px;
+  padding:11px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:#111827;
+  color:white;
+  cursor:pointer;
+  text-align:left;
+  font-weight:bold;
+}
+.phase-btn.active, .lead-btn.active {
+  border-color:var(--accent);
+  background:#172554;
+}
+.lead-btn small {
+  display:block;
+  color:var(--muted);
+  font-weight:normal;
+  margin-top:4px;
+}
+input, textarea, select {
+  width:100%;
+  background:#020617;
+  color:white;
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:14px;
+}
+textarea {
+  min-height:150px;
+  resize:vertical;
+}
+label {
+  display:block;
+  font-size:13px;
+  color:#bfdbfe;
+  margin-bottom:6px;
+  font-weight:bold;
+}
+.grid2 {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:14px;
+}
+.grid3 {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:14px;
+}
+.script {
+  white-space:pre-wrap;
+  overflow-wrap:anywhere;
+  background:#020617;
+  border-left:4px solid var(--accent);
+  padding:16px;
+  border-radius:12px;
+  line-height:1.55;
+}
+.path-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:14px;
+}
+.path {
+  background:var(--panel2);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:14px;
+}
+.good { border-color:#16a34a; }
+.warn { border-color:#f59e0b; }
+.bad { border-color:#ef4444; }
+button {
+  border:none;
+  padding:11px 14px;
+  border-radius:12px;
+  cursor:pointer;
+  font-weight:bold;
+}
+.main-btn { background:var(--accent); color:#02111f; }
+.secondary-btn {
+  background:#111827;
+  border:1px solid var(--border);
+  color:white;
+}
+.danger-btn {
+  background:#3f1111;
+  border:1px solid #7f1d1d;
+  color:white;
+}
+.flex { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+.status-line {
+  color:#93c5fd;
+  font-size:13px;
+  margin-top:10px;
+}
+.autosave-hint {
+  color:#94a3b8;
+  font-size:12px;
+  margin-top:8px;
+}
+.sticky-note-card {
+  position: fixed;
+  left: 300px;
+  right: 430px;
+  bottom: 0;
+  z-index: 999;
+  margin: 0;
+  border-radius: 18px 18px 0 0;
+  border-bottom: 0;
+  box-shadow: 0 -16px 40px rgba(0,0,0,.45);
+}
+.sticky-note-card textarea {
+  min-height: 95px;
+  max-height: 150px;
+}
+@media(max-width:1100px) {
+  .sticky-note-card {
+    position: sticky;
+    left: auto;
+    right: auto;
+    bottom: 0;
+    border-radius:18px;
+  }
+}
+hr {
+  border:0;
+  border-top:1px solid var(--border);
+  margin:16px 0;
+}
+.search {
+  margin-bottom:10px;
+}
+.muted { color:var(--muted); }
+.setter-switch {
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.setter-btn {
+  flex:1;
+  min-width:80px;
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:#111827;
+  color:white;
+  cursor:pointer;
+  font-weight:bold;
+}
+.setter-btn.active {
+  background:#172554;
+  border-color:var(--accent);
+  color:#bfdbfe;
+}
+
+.objection-panel {
+  border-left:1px solid var(--border);
+  background:#07101f;
+  padding:14px;
+  overflow-y:auto;
+  position:sticky;
+  top:0;
+  height:calc(100vh - 83px);
+}
+.objection-title {
+  font-size:15px;
+  color:#bfdbfe;
+  font-weight:bold;
+  margin-bottom:10px;
+}
+.objection-card {
+  background:#111827;
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:12px;
+  margin-bottom:10px;
+  cursor:pointer;
+}
+.objection-card:hover {
+  border-color:var(--accent);
+}
+.objection-card h4 {
+  margin:0;
+  font-size:14px;
+}
+.objection-content {
+  display:none;
+  margin-top:12px;
+}
+.objection-card.open .objection-content {
+  display:block;
+}
+.objection-section {
+  margin-top:10px;
+}
+.objection-section strong {
+  color:#bfdbfe;
+}
+.objection-mini {
+  white-space:pre-wrap;
+  background:#020617;
+  border-left:3px solid var(--accent);
+  padding:10px;
+  border-radius:10px;
+  line-height:1.45;
+  margin-top:6px;
+  font-size:13px;
+}
+.empty-objections {
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.45;
+}
+.global-tools {
+  margin-top:32px;
+  border-top:2px solid rgba(147,197,253,.18);
+  padding-top:24px;
+}
+.global-tool-card {
+  background:#111827;
+  border:1px solid #475569;
+  border-radius:14px;
+  padding:12px;
+  margin-bottom:10px;
+  cursor:pointer;
+}
+.global-tool-card:hover {
+  border-color:#93c5fd;
+}
+.global-tool-card h4 {
+  margin:0;
+  font-size:14px;
+}
+.global-tool-content {
+  display:none;
+  margin-top:12px;
+}
+.global-tool-card.open .global-tool-content {
+  display:block;
+}
+
+@media(max-width:1100px) {
+  .layout { grid-template-columns:1fr; }
+  .objection-panel { position:relative; height:auto; border-left:0; border-top:1px solid var(--border); }
+}
+
+@media(max-width:950px) {
+  .layout { grid-template-columns:1fr; }
+  .grid2, .grid3 { grid-template-columns:1fr; }
+}
+</style>
+</head>
+
+<body>
+<header>
+  <h1>Love Repair Click Tool CRM</h1>
+  <p>Supabase Cloud · Lead-Liste · Phasen-Notizen · Closer-Übergabe</p>
+</header>
+
+<div class="layout">
+  <aside>
+    <div class="card">
+      <div class="sidebar-title">Aktiver Setter</div>
+      <div class="setter-switch" id="setterSwitch"></div>
+      <hr>
+      <button class="main-btn" style="width:100%;" onclick="newLead()">+ Neuer Lead</button>
+      <div class="status-line" id="sideStatus">Lade Leads...</div>
+    </div>
+
+    <div class="card">
+      <div class="sidebar-title">Lead suchen</div>
+      <input class="search" id="leadSearch" placeholder="Name, Setter, Status..." oninput="renderLeadList()" />
+      <div class="sidebar-title">Gespeicherte Leads</div>
+      <div id="leadList"></div>
+    </div>
+
+    <div class="card">
+      <div class="sidebar-title">Phasen</div>
+      <div id="phaseNav"></div>
+    </div>
+  </aside>
+
+  <main id="main"></main>
+  <aside class="objection-panel">
+    <div class="card">
+      <div class="objection-title">Einwände dieser Phase</div>
+      <div id="objectionPanel"></div>
+
+      <div class="global-tools">
+        <div class="objection-title">Sofort-Tools</div>
+        <div id="globalToolsPanel"></div>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<script>
+const supabaseClient = supabase.createClient("https://crtyrybrbjoqasyikntl.supabase.co", "sb_publishable_aCJP6vi1Iacy2c26t57sOA_-Gc6C2KE");
+
+const phases = [
+  {
+    title: "Phase 1 — Begrüßung + Frame",
+    goal: "Unterscheiden, ob der Termin noch vereinbart werden muss oder ob der Termin bereits steht. Danach sauber den Gesprächsrahmen setzen.",
+    script: `Option 1 — Termin muss vereinbart werden
+
+„Hey — [NAME]?“
+
+„${activeSetter || "Marvin"} hier aus dem Love Repair Team von Florian. Du hattest dich ja für einen Platz in Florians persönlicher Ex-Zurück-Begleitung beworben.“
+
+„Bei uns ist die Vorgehensweise so, dass wir deine/n Ex von selbst dazu bringen, sich einen Neuanfang mit dir zu wünschen — ohne dass du hinterherrennen oder dich verbiegen musst.“
+
+„Klingelt da was bei dir?“
+
+„Pass auf — ich hab grade eine Liste mit Leuten, die sich in den letzten Tagen eingetragen haben. Ich hab deine Nummer gerade rausgepickt.“
+
+„Hast du vielleicht ein paar Minuten Zeit? Dann könnte ich dir ein paar Fragen stellen, um herauszufinden, ob wir dir in deiner Situation weiterhelfen können.“
+
+
+Option 2 — Termin wurde bereits vereinbart
+
+„Hey [NAME], ${activeSetter || "Marvin"} hier aus dem Love Repair Team. Passt's grade? Bist du irgendwo, wo du in Ruhe reden kannst?“
+
+„Ganz kurz bevor ich dir die erste Frage stelle [NAME] — mir geht es hier heute nicht darum, dir irgendwas zu verkaufen. Ich werde dir heute also kein Angebot machen.“
+
+„Bei uns läuft das ein bisschen anders ab. Für die persönliche Begleitung suchen wir Menschen, bei denen wir auch wirklich eine Erfolgsgeschichte schreiben können.“
+
+„Wenn ich am Ende der Meinung bin, dass wir dir wirklich helfen können, bekommst du einen kostenlosen Termin mit einem unserer Experten. Der nimmt sich ein, zwei Stunden Zeit für dich und stellt dir einen Schritt-für-Schritt-Plan vor.“
+
+„Also — hast du Lust? Sollen wir das so machen?“`,
+    paths: [],
+    notes: "Notieren: Musste Termin vereinbart werden oder war er schon vereinbart? Hatte der Lead Ruhe? Musste neu terminiert werden? Erste Gesprächsbereitschaft."
+  },
+  {
+    title: "Phase 2 — Wunsch 1–10",
+    goal: "Wunsch prüfen. Wenn Block davorliegt, nicht diskutieren — nur erkennen und notieren.",
+    script: `„Auf einer Skala von 1 bis 10 — wie sicher bist du, dass du sie/ihn wirklich zurück willst? 10 wäre absolut. 1 wäre: eigentlich auch egal.“`,
+    paths: [
+      {label:"9–10: klar dahinter", type:"good", text:"„Mhm. Schön zu hören.“\nWeiter zu Phase 3."},
+      {label:"5–8: zögernd", type:"warn", text:"„Mhm. Eine [ZAHL]. Was steckt dahinter — warum nicht höher?“\nBlock notieren, dann weiter."},
+      {label:"1–4 oder Block", type:"bad", text:"„Wenn sie/er morgen vor dir stehen würde und sagen würde: Ich vermisse dich — würdest du sie/ihn zurücknehmen?“\nBei Ja: Wunsch ist da, Block liegt davor.\nBei echtem Nein: disqualifizieren."}
+    ],
+    notes: "Notieren: Wunsch-Zahl + Block: Erschöpfung, Resignation, Stolz, Unklarheit."
+  },
+  {
+    title: "Phase 3 — Informationsgewinnung",
+    goal: "Die harten Beziehungsdaten einsammeln, damit Setter und Closer den Fall sauber einordnen können.",
+    script: `„Okay [NAME], bevor wir tiefer reingehen, brauche ich kurz ein paar Eckdaten, damit ich eure Situation richtig einordnen kann.“
+
+„Wie lange wart ihr zusammen?“
+
+„Seit wann seid ihr getrennt?“
+
+„Wer hat sich getrennt — du oder sie/er?“
+
+„Habt ihr aktuell Kontakt? Wenn ja: wie oft und worüber?“
+
+„Wohnt ihr noch zusammen, seht ihr euch regelmäßig oder gibt es Kinder / gemeinsame Verpflichtungen?“
+
+„Gab es seit der Trennung schon neue Personen, Dating oder eine neue Beziehung auf einer Seite?“
+
+„Was war seit der Trennung der wichtigste Moment zwischen euch — positiv oder negativ?“`,
+    paths: [
+      {label:"Frische Trennung", type:"warn", text:"Besonders prüfen: Panik, Druck, Hinterherrennen, emotionale Kurzschlussreaktionen."},
+      {label:"Lange getrennt", type:"warn", text:"Besonders prüfen: Restkontakt, neue Partner, Hoffnungsschleife, konkrete Anknüpfungspunkte."},
+      {label:"Kinder / Alltag / gemeinsames Wohnen", type:"good", text:"Notieren: Kontaktpunkte und Risiken. Später wichtig für Strategie und Fehlervermeidung."},
+      {label:"Neue Person im Spiel", type:"bad", text:"Nicht dramatisieren. Nur einordnen: Wie sicher? Wie lange? Offiziell oder Vermutung?"}
+    ],
+    notes: "Notieren: Beziehungsdauer, Trennungsdauer, wer sich getrennt hat, Kontaktstatus, Wohnsituation, Kinder/gemeinsame Verpflichtungen, neue Person, wichtigste Ereignisse seit Trennung."
+  },
+  {
+    title: "Phase 4 — Pain",
+    goal: "Lead soll fühlen, was ihn wirklich belastet. Nicht trösten. Pausen halten.",
+    script: `„[NAME] — lass uns mal kurz ehrlich werden.“
+
+„Was ist grade das Schlimmste an deiner Situation? Was reibt dich am meisten auf?“
+
+Vertiefung nach Resonanz:
+„Was vermisst du am meisten an ihr/ihm? Ganz konkret — die kleinen Sachen?“
+„Was macht das alles mit dir selbst? Mit deinem Bild von dir?“
+„Familie, Freunde — wissen die wirklich, wie's dir grade geht?“
+„Wie schläfst du grade? Und tagsüber — kannst du dich konzentrieren?“`,
+    paths: [
+      {label:"Lead öffnet sich", type:"good", text:"Ausreden lassen. Danach spiegeln: „Du hast mir grade erzählt: [seine Worte]. Hab ich das richtig?“"},
+      {label:"Lead bleibt oberflächlich", type:"warn", text:"Konkreter fragen: „Was ist der Moment am Tag, wo es am meisten reinkickt?“"}
+    ],
+    notes: "Notieren: stärkste Pain-Punkte exakt in seinen Worten."
+  },
+  {
+    title: "Phase 5 — Trennungsgrund + Status",
+    goal: "Prüfen, ob der Lead den Trennungsgrund wirklich versteht oder nur vermutet.",
+    script: `„[NAME] — Hand aufs Herz: Warum will deine Ex/dein Ex nicht mehr mit dir zusammen sein? Hast du da eine Idee?“`,
+    paths: [
+      {label:"Hat viel auf dem Schirm", type:"good", text:"„Denkst du, du hast wirklich alles auf dem Schirm? Oder kann es sein, dass es Dinge gibt, die sie/er nur gefühlt, aber nie ausgesprochen hat?“"},
+      {label:"Idee, aber kein Durchblick", type:"warn", text:"„Also du hast eine Idee, aber so wirklich den Durchblick — den hast du nicht, oder?“"},
+      {label:"Gar keine Ahnung", type:"bad", text:"„Also du hast gar keine wirkliche Ahnung, wie das passiert ist?“"}
+    ],
+    notes: "Notieren: viel auf dem Schirm / Idee ohne Durchblick / keine Ahnung."
+  },
+  {
+    title: "Phase 6 — Wunsch tief",
+    goal: "Zielbild emotional öffnen, damit später der Gap sichtbar wird.",
+    script: `„Wenn du dir's wünschen könntest — wie soll's mit euch in einem halben Jahr aussehen? Mal dir das mal aus.“
+
+„Und wenn das wieder so wäre — wie würdest du dich fühlen?“`,
+    paths: [
+      {label:"Lead malt Zukunft", type:"good", text:"Nicht unterbrechen. Worte für später notieren."},
+      {label:"Lead ist blockiert", type:"warn", text:"„Was wäre das Erste, woran du merken würdest: jetzt sind wir wieder wirklich verbunden?“"}
+    ],
+    notes: "Notieren: Wunsch-Bild in seinen Worten."
+  },
+  {
+    title: "Phase 7 — Vorgehensweise",
+    goal: "Aktuellen Plan prüfen und destabilisieren: passiv, planlos oder scheinbar auf gutem Weg.",
+    script: `„[NAME] — was machst du grade konkret, um sie/ihn zurückzugewinnen? Was ist grade dein Plan?“`,
+    paths: [
+      {label:"Gar nichts / Kontaktsperre", type:"bad", text:"„Du hast keine Ahnung, wie du da rangehen sollst, deswegen machst du erstmal nichts. Stimmt das?“\n„Hast du das Gefühl, dass du dadurch näher kommst?“"},
+      {label:"Irgendwas / schreibt / arbeitet an sich", type:"warn", text:"„Hast du das Gefühl, dass ihr euch wirklich annähert — oder ist das eher für dich und deine Stärkung gut?“\n„Richtig Fortschritt oder heiß/kalt?“"},
+      {label:"Auf gutem Weg", type:"warn", text:"„Bekommst du eindeutige Zeichen, dass sie/er wieder mit dir zusammen sein will? Warum machst du dann nicht einfach genauso weiter?“"}
+    ],
+    notes: "Notieren: was macht Lead, was kam zurück, wo ist er gescheitert."
+  },
+  {
+    title: "Phase 8 — Mauer-Mechanik",
+    goal: "Zentraler Klick: Selbstschutz, negative Erinnerungen, Mauer, Heiß-Kalt als Blockade-Beweis.",
+    script: `„Darf ich dir mal eine andere Perspektive eröffnen?“
+
+„Nach der Trennung entsteht im Unterbewusstsein ein Selbstschutz. Sie/er fokussiert sich auf alles Negative, was es bei euch gab. Aus diesen Punkten baut sich eine Mauer.“
+
+„Wenn du versuchst, ranzukommen, zu überzeugen oder dich zu beweisen, reagiert diese Mauer. Dann wirkt es für sie/ihn so, als wolltest du sie/ihn wieder in das Boot holen, mit dem sie/er abgesoffen ist.“
+
+„Deswegen ist deine Ex/dein Ex grade so kalt. Und dieses Heiß-Kalt ist oft ein Beweis, dass da noch etwas ist — aber dass innerlich etwas blockiert.“
+
+„Macht das für dich Sinn?“`,
+    paths: [
+      {label:"Lead versteht", type:"good", text:"Weiter zu Phase 9."},
+      {label:"Lead versteht nicht", type:"warn", text:"Mit seinem konkreten Beispiel erklären: „Immer wenn du [sein Verhalten] machst, kommt bei ihr/ihm [negativer Schutzimpuls] hoch.“"}
+    ],
+    notes: "Notieren: Reaktion auf Mauer-Erklärung. Hat es geklickt?"
+  },
+  {
+    title: "Phase 9 — Konsequenz",
+    goal: "Lead soll selbst erkennen, dass sein aktuelles Vorgehen die Mauer nicht abbaut.",
+    script: `„Wenn du willst, dass sie/er sich wieder einlassen kann, muss sie/er von selbst auf den Gedanken kommen, dass die Trennung ein Fehler war.“
+
+„Und das funktioniert nur, wenn diese Mauer Stück für Stück abgebaut wird.“`,
+    paths: [
+      {label:"Bei gar nichts", type:"bad", text:"„Denkst du, diese innere Mauer baut sich von selbst ab, wenn du einfach weiter wartest?“"},
+      {label:"Bei irgendwas", type:"warn", text:"„Glaubst du wirklich, dass dadurch bei ihr/ihm innere Sicherheit entsteht?“"},
+      {label:"Bei gutem Weg", type:"warn", text:"„Solange die Mauer nicht wirklich abgebaut ist, kann das jederzeit wieder kippen.“"}
+    ],
+    notes: "Notieren: Hat Lead selbst erkannt, warum es so nicht reicht?"
+  },
+  {
+    title: "Phase 10 — Gap bilden",
+    goal: "Alles in seinen Worten zusammenfassen: aktueller Schmerz vs. gewünschtes Ziel.",
+    script: `„Okay [NAME] — ich fass mal kurz zusammen, was du mir bis hier erzählt hast.“
+
+„Ihr seid seit [ZEIT] getrennt. Sie/er will grade nicht mehr. Du hast vielleicht eine Idee, was passiert ist — aber der ganze Durchblick fehlt dir noch.“
+
+„Und du wünschst dir [WUNSCHBILD]. Stimmt das so?“
+
+„Wenn ich ehrlich sein darf: zwischen wo du grade stehst und wo du hin willst, sind grade noch Welten.“`,
+    paths: [
+      {label:"Lead bestätigt", type:"good", text:"Weiter zu Phase 11."},
+      {label:"Lead korrigiert", type:"warn", text:"Korrektur aufnehmen, neu spiegeln, dann weiter."}
+    ],
+    notes: "Notieren: stärkster Gap-Satz."
+  },
+  {
+    title: "Phase 11 — Gute und schlechte Nachricht",
+    goal: "Hoffnung + Realitätsdruck setzen.",
+    script: `„Ich hab jetzt eine gute und eine schlechte Nachricht für dich.“
+
+„Die gute Nachricht: wenn du das Ganze richtig angehst, kannst du sie/ihn wieder zurückgewinnen.“
+
+„Die schlechte Nachricht: wenn du genauso weitermachst wie bisher, dann wirst du sie/ihn verlieren. Weil du es nicht schaffst, wirklich zu ihr/ihm durchzudringen.“`,
+    paths: [
+      {label:"Lead nimmt es an", type:"good", text:"Weiter zum Wert-Frame."},
+      {label:"Lead widerspricht", type:"warn", text:"Zurück auf seine eigenen Aussagen: „Was macht dich sicher, obwohl du vorhin gesagt hast, dass [Pain/Unsicherheit]?“"}
+    ],
+    notes: "Notieren: Reaktion auf Konsequenz."
+  },
+  {
+    title: "Phase 12 — Wert-Frame",
+    goal: "Lead trennt Wert von Geld. Es geht nicht um Geld, sondern um Vertrauen/Funktionieren.",
+    script: `„Stell dir vor, jemand gibt dir zwei Sachen zur Auswahl: 50.000 Euro heute auf dein Konto — oder sie/er kommt zurück, echte Version, echte Gefühle. Was würdest du nehmen?“
+
+„Und wenn ein Zauberer dir mit hundertprozentiger Garantie sagen würde: in vier Wochen steht sie/er wieder vor dir, echte Gefühle — aber es kostet 15.000 Euro. Würdest du's machen?“
+
+„Heißt — es geht dir nicht ums Geld. Es geht darum, ob's wirklich funktioniert. Stimmt's?“`,
+    paths: [
+      {label:"Lead sagt Ex", type:"good", text:"Wert sauber spiegeln."},
+      {label:"Lead zögert", type:"warn", text:"Nicht drücken. Fragen: „Was macht dich unsicher — der Wert oder die Angst, dass es nicht funktioniert?“"}
+    ],
+    notes: "Notieren: Antworten auf 50k und 15k."
+  },
+  {
+    title: "Phase 13 — Money-Drop + Termin",
+    goal: "Preisrahmen transparent prüfen, ohne final zu verkaufen. Nur Termin qualifizieren.",
+    script: `„Die Begleitung liegt zwischen 4.500 und 5.500 Euro. Einmaliger Betrag. Kein Abo. Keine versteckten Kosten.“
+
+„Der Betrag fällt nur an, wenn du im zweiten Gespräch wirklich überzeugt bist und selbst sagst: Ja, das ist mein Weg.“
+
+„Wäre das ein Rahmen, der für dich grundsätzlich machbar wäre — vorausgesetzt, der Plan überzeugt dich am Ende wirklich?“`,
+    paths: [
+      {label:"Ja, machbar", type:"good", text:"Verifikation: „Wie würdest du das aufbringen — Erspartes, Klarna, Raten?“ Dann Termin."},
+      {label:"Zu viel / kann ich nicht", type:"warn", text:"Wert-Anker zurück: „Wir reden nicht über 50k oder 15k. Wir reden über 4 bis 5. Ist es Wert — oder Liquidität?“"},
+      {label:"Muss überlegen", type:"warn", text:"„Es ist keine endgültige Entscheidung. Nur: wäre es grundsätzlich machbar, wenn der Plan überzeugt — ja oder nein?“"},
+      {label:"Nein / unter Schwelle", type:"bad", text:"Sauber disqualifizieren. Material/Podcast anbieten."}
+    ],
+    notes: "Abschluss-Notizen komplettieren: Beziehungsdauer, Trennungsdauer, Kontaktstatus, Wunsch-Zahl, Pain, Status, Wunschbild, Vorgehen, Finanzen, Terminfähigkeit."
+  }
+];
+
+
+const objectionsByPhase = {
+  2: [
+    {
+      title: "Es gibt schon einen anderen Partner.",
+      meaning: "Der Lead externalisiert die Situation auf die neue Person. Gefahr: Er sieht den/die Neue/n als Ursache statt als Symptom der offenen Mauer und seines fehlenden Zugangs.",
+      goal: "Neue Person nicht kleinreden. Fokus zurück auf seine Position, die Blockade und die Frage, warum diese Tür überhaupt offen war.",
+      questions: `„Versteh ich. Und glaubst du, diese Person ist wirklich die Ursache — oder eher das Ergebnis davon, dass zwischen euch vorher schon etwas offen war?“
+
+„Wenn diese neue Person morgen weg wäre: wären eure alten Themen dann automatisch gelöst?“
+
+„Würde sie/er dann sofort sicher fühlen: Mit dir wird es diesmal anders?“
+
+„Oder wäre die eigentliche Mauer zwischen euch immer noch da?“`,
+      transition: "„Genau deshalb dürfen wir nicht gegen die andere Person kämpfen. Wir müssen an dem arbeiten, was zwischen euch steht — sonst bleibt jeder neue Kontakt nur ein Symptom.“"
+    }
+
+  ],
+  3: [
+    {
+      title: "Lead lässt sich nicht in den Schmerz führen",
+      meaning: "Der Lead bleibt rational, weichgespült oder erzählt nur oberflächlich. Oft schützt er sich davor, den echten Schmerz zu fühlen. Gefahr: Ohne Pain entsteht später kein echter Gap und keine Dringlichkeit.",
+      goal: "Nicht drücken oder dramatisieren. Den Lead sanft aus der Kopfebene in konkrete Alltagssituationen und innere Folgen führen.",
+      questions: `„Mhm, verstehe. Lass uns das einmal weniger theoretisch machen.“
+
+„Wann am Tag merkst du es am meisten? Morgens, abends, wenn du alleine bist?“
+
+„Was ist der eine Moment, wo du merkst: Scheiße, sie/er fehlt wirklich?“
+
+„Was machst du dann? Lenkst du dich ab oder lässt du das wirklich kurz zu?“
+
+„Und wenn du ehrlich bist: Was macht das mit deinem Bild von dir selbst, dass du gerade nicht zu ihr/ihm durchkommst?“`,
+      transition: "„Genau das meine ich. Es geht nicht darum, das größer zu machen als es ist — sondern einmal ehrlich zu sehen, was diese Situation wirklich mit dir macht.“"
+    }
+  ],
+
+  11: [
+    {
+      title: "Was, wenn es langfristig trotzdem nicht hält?",
+      meaning: "Der Lead sucht emotionale Garantie vor der Entscheidung. Dahinter steckt oft Angst davor, erneut verletzt zu werden oder 'umsonst investiert' zu haben.",
+      goal: "Nicht versuchen Sicherheit zu garantieren. Stattdessen den Fokus auf Entwicklung, Eigenverantwortung und das Risiko des Nichtstuns lenken.",
+      questions: `„Versteh ich total. Aber lass mich dich was fragen…“
+
+„Gab es jemals irgendwo in Beziehungen eine Garantie dafür, dass etwas für immer hält?“
+
+„Die eigentliche Frage ist doch eher: Wie hoch ist die Wahrscheinlichkeit, dass es diesmal wieder scheitert — WENN ihr genau gleich weitermacht wie früher?“
+
+„Denn genau dafür macht man diese ganze Aufarbeitung ja überhaupt.“
+
+„Nicht damit man einfach wieder zusammenkommt… sondern damit die Beziehung diesmal auf einem komplett anderen Fundament steht.“
+
+„Und ganz ehrlich: Wenn du heute schon sagst, du würdest nicht investieren, weil es vielleicht irgendwann wieder scheitern könnte… dann dürfte man eigentlich niemals wieder eine Beziehung eingehen.“`,
+      transition: "„Die eigentliche Frage ist also gerade nicht: ‚Kann mir das jemand garantieren?‘ — sondern: ‚Bin ich diesmal wirklich bereit, etwas anders zu machen als früher?‘“"
+    }
+  ],
+  4: [
+    {
+      title: "Externalisierung: Der neue Mann / Alltag / Umstände sind schuld",
+      meaning: "Der Lead verlagert die Ursache nach außen. Neuer Partner, Alltag, Stress, Umfeld oder andere Umstände werden als Hauptgrund gesehen. Gefahr: Er bleibt im Opfer-/Erklärmodus und kommt nicht an seinen eigenen Anteil oder an die eigentliche Beziehungsdynamik.",
+      goal: "Nicht dagegen argumentieren. Erst zustimmen, dass diese Faktoren eine Rolle spielen können. Dann sauber trennen zwischen Auslöser und Ursache.",
+      questions: `„Ja, verstehe ich. Und ich will gar nicht sagen, dass der neue Mann / der Alltag / die Umstände keine Rolle spielen.“
+
+„Aber lass mich dich was fragen: Wenn dieser Faktor morgen weg wäre — wären eure alten Themen dann automatisch gelöst?“
+
+„Würde sie/er dann sofort wieder sicher fühlen: Mit dir wird es diesmal wirklich anders?“
+
+„Oder kann es sein, dass dieser Faktor eher sichtbar gemacht hat, was zwischen euch vorher schon nicht mehr stabil war?“
+
+„Was glaubst du, welchen Anteil hattest du selbst daran, dass diese Tür überhaupt aufgehen konnte?“`,
+      transition: "„Genau deshalb ist es so wichtig, dass wir nicht nur auf den neuen Mann oder die Umstände schauen, sondern auf das, was zwischen euch wirklich passiert ist.“"
+    },
+    {
+      title: "Ich habe schon aufgearbeitet.",
+      meaning: "Der Lead glaubt, dass Verstehen bereits Veränderung bedeutet. Oft ist es eine Schutzbehauptung, um nicht tiefer in Verantwortung oder neue blinde Flecken zu gehen.",
+      goal: "Nicht widersprechen. Erst anerkennen, dann trennen zwischen 'verstanden' und 'wirksam verändert'.",
+      questions: `„Macht Sinn. Was genau hast du denn aufgearbeitet?“
+
+„Und woran würde deine Ex/dein Ex konkret merken, dass das nicht nur verstanden, sondern wirklich verändert ist?“
+
+„Wenn sie/er das schon sicher fühlen würde — warum glaubst du, steht sie/er dann noch nicht wieder voll bei dir?“
+
+„Kann es sein, dass du für dich viel verstanden hast, aber bei ihr/ihm diese Sicherheit noch gar nicht angekommen ist?“`,
+      transition: "„Genau darum geht’s hier nicht nur um Aufarbeitung in deinem Kopf, sondern darum, wie diese Sicherheit auf ihrer/seiner Seite wieder entstehen kann.“"
+    }
+  ],
+  7: [
+  ],
+  12: [
+    {
+      title: "Wenn dann nur per Ratenzahlung",
+      meaning: "Der Lead signalisiert nicht automatisch Ablehnung. Oft versucht er gerade emotional einen Weg zu finden, wie es trotz Angst oder finanzieller Spannung möglich werden könnte.",
+      goal: "Nicht sofort verkaufen oder Druck machen. Erst Finanzierung entdramatisieren und von der Gesamtsumme auf die reale Monatsbelastung wechseln.",
+      questions: `„Also die Kosten der Begleitung liegen zwischen 4500 und 5000 Euro.“
+
+„Es gibt die Möglichkeit über drei Raten mit uns in die Finanzierung zu gehen — da kostet die Begleitung 3x1666 Euro oder 2x2350 Euro.“
+
+„Aber es gibt eben auch die Möglichkeit über Klarna das Ganze in 3, 6, 12 oder 24 Monaten zu bezahlen.“
+
+„Sind 200 Euro etwas, was du dafür im Monat wirklich über hast — vorausgesetzt du bist wirklich vom Plan überzeugt?“`,
+      transition: "„Die eigentliche Frage ist ja gerade eher: Wenn du wirklich überzeugt bist — wäre es grundsätzlich möglich oder fehlt dir noch Sicherheit?“"
+    }
+
+  ]
+};
+
+function toggleObjection(index) {
+  const el = document.getElementById("objection-" + index);
+  if (!el) return;
+  el.classList.toggle("open");
+}
+
+
+const globalTools = [
+  {
+    title: "Kunde redet dazwischen",
+    situation: "Lead unterbricht, erklärt sich dauernd, springt in Rechtfertigung oder übernimmt die Gesprächsführung.",
+    goal: "Sanft stoppen, Führung zurückholen, ohne dominant oder genervt zu wirken.",
+    script: `„Warte kurz, [NAME] — ich stopp dich einmal ganz bewusst, nicht weil das unwichtig ist, sondern weil ich sonst den roten Faden verliere.“
+
+„Ich will das sauber mit dir durchgehen, sonst reden wir gleich über zehn Baustellen gleichzeitig und am Ende hast du trotzdem keine Klarheit.“
+
+„Lass mich den Punkt einmal zu Ende führen, dann komm ich direkt auf das zurück, was du gerade gesagt hast.“`,
+    transition: "Danach sofort zurück zur aktuellen Frage im Leitfaden."
+  },
+  {
+    title: "Kunde fragt direkt nach dem Preis",
+    situation: "Lead will den Preis hören, bevor Pain, Gap, Situation oder der eigentliche Wert aufgebaut wurden.",
+    goal: "Preis nicht verweigern, aber die Struktur behalten. Erst Kontext und Situation verstehen, bevor Zahlen genannt werden.",
+    script: `„Klar, verstehe ich total.“
+
+„Und du sollst heute auch absolute Klarheit darüber bekommen.“
+
+„Nur ganz ehrlich: Wenn ich dir jetzt einfach irgendeine Zahl nenne, bevor ich überhaupt verstehe, wie eure Situation aussieht… dann wäre das eigentlich komplett unseriös.“
+
+„Weil ich ja noch gar nicht weiß:
+- wie komplex eure Situation ist
+- wie viel überhaupt aufgearbeitet werden muss
+- und vor allem, ob wir dir überhaupt sinnvoll helfen können.“
+
+„Lass uns das erstmal sauber auseinandernehmen — und dann sprechen wir ganz transparent über die Möglichkeiten, okay?“`,
+    transition: "Danach sofort zurück in Informationsgewinnung, Pain oder Gap."
+  },
+  {
+    title: "Die Zeit wird das schon richten",
+    situation: "Lead glaubt, dass Abstand von selbst heilt und die Ex/der Ex irgendwann automatisch wieder offen wird.",
+    goal: "Zeit nicht komplett entwerten, aber klar machen: Zeit ohne richtige Veränderung stabilisiert oft nur Distanz.",
+    script: `„Kann sein, dass Zeit etwas beruhigt — aber darf ich dir eine ehrliche Frage stellen?“
+
+„Wenn Zeit alleine Beziehungen heilen würde, warum werden dann aus ein paar Wochen Abstand so oft Monate oder Jahre Funkstille?“
+
+„Zeit verändert nicht automatisch das Bild, das sie/er gerade von dir hat.“
+
+„Wenn Distanz, Unsicherheit oder negative Erinnerungen gerade zwischen euch stehen, dann macht Zeit diese Dinge oft nicht kleiner — sondern stabiler.“
+
+„Die Frage ist also nicht nur: Wie viel Zeit vergeht? Sondern: Was verändert sich in dieser Zeit wirklich an dem, was zwischen euch steht?“`,
+    transition: "Danach zurück zur Mauer-Mechanik, zum Gap oder zur Frage: Was machst du gerade konkret?"
+  },
+  {
+    title: "Kunde schweift ab",
+    situation: "Lead erzählt viele Details, aber nicht mehr zielgerichtet. Gefahr: Gespräch wird Therapie/Storytime.",
+    goal: "Wertschätzen, verdichten, zurück zur entscheidenden Ebene.",
+    script: `„Mhm, ich verstehe. Und ich glaube, genau daran merkt man auch, wie komplex das bei euch geworden ist.“
+
+„Damit ich dir aber wirklich helfen kann, muss ich es einmal runterbrechen.“
+
+„Wenn du das auf den Kern reduzierst: Was war aus deiner Sicht der eigentliche Punkt, an dem es zwischen euch gekippt ist?“`,
+    transition: "Zurück zu Trennungsgrund, Pain oder Vorgehensweise — je nachdem, wo du gerade bist."
+  }
+];
+
+function toggleGlobalTool(index) {
+  const el = document.getElementById("global-tool-" + index);
+  if (!el) return;
+  el.classList.toggle("open");
+}
+
+function renderGlobalTools() {
+  const panel = document.getElementById("globalToolsPanel");
+  if (!panel) return;
+
+  panel.innerHTML = globalTools.map((tool, i) => `
+    <div class="global-tool-card" id="global-tool-${i}" onclick="toggleGlobalTool(${i})">
+      <h4>${safe(tool.title)}</h4>
+      <div class="global-tool-content">
+        <div class="objection-section">
+          <strong>Situation</strong>
+          <div class="objection-mini">${safe(tool.situation)}</div>
+        </div>
+        <div class="objection-section">
+          <strong>Ziel</strong>
+          <div class="objection-mini">${safe(tool.goal)}</div>
+        </div>
+        <div class="objection-section">
+          <strong>Sag das</strong>
+          <div class="objection-mini">${safe(personalize(tool.script))}</div>
+        </div>
+        <div class="objection-section">
+          <strong>Zurück</strong>
+          <div class="objection-mini">${safe(personalize(tool.transition))}</div>
+        </div>
+      </div>
+    </div>
+  `).join("");
+}
+
+function renderObjections() {
+  const panel = document.getElementById("objectionPanel");
+  if (!panel) return;
+
+  const objections = objectionsByPhase[currentPhase] || [];
+
+  if (!objections.length) {
+    panel.innerHTML = `<div class="empty-objections">In dieser Phase sind aktuell keine Test-Einwände hinterlegt.</div>`;
+    return;
+  }
+
+  panel.innerHTML = objections.map((o, i) => `
+    <div class="objection-card" id="objection-${i}" onclick="toggleObjection(${i})">
+      <h4>${safe(o.title)}</h4>
+      <div class="objection-content">
+        <div class="objection-section">
+          <strong>Bedeutung</strong>
+          <div class="objection-mini">${safe(o.meaning)}</div>
+        </div>
+        <div class="objection-section">
+          <strong>Ziel</strong>
+          <div class="objection-mini">${safe(o.goal)}</div>
+        </div>
+        <div class="objection-section">
+          <strong>Fragen</strong>
+          <div class="objection-mini">${safe(personalize(o.questions))}</div>
+        </div>
+        <div class="objection-section">
+          <strong>Zurück in den Leitfaden</strong>
+          <div class="objection-mini">${safe(personalize(o.transition))}</div>
+        </div>
+      </div>
+    </div>
+  `).join("");
+}
+
+
+let currentPhase = 0;
+let leads = [];
+let currentLead = null;
+let activeSetter = localStorage.getItem("lr_active_setter") || "Marvin";
+let autosaveTimer = null;
+let isSavingNote = false;
+
+function safe(v) {
+  return String(v || "")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;");
+}
+
+
+function setterNameForText() {
+  return activeSetter || "${activeSetter || "Marvin"}";
+}
+
+function leadNameForText() {
+  const inputName = document.getElementById("leadName")?.value?.trim();
+  const loadedName = currentLead?.name || "";
+  return inputName || loadedName || "[NAME]";
+}
+
+function leadFirstName() {
+  const name = leadNameForText();
+  return name && name !== "[NAME]" ? name.split(" ")[0] : "[NAME]";
+}
+
+function personalize(text) {
+  return String(text || "")
+    .replaceAll("[NAME]", leadFirstName())
+    .replaceAll("${activeSetter || "Marvin"}", activeSetter || "${activeSetter || "Marvin"}");
+}
+
+
+
+function leadFirstName() {
+  const inputName = document.getElementById("leadName")?.value?.trim();
+  const loadedName = currentLead?.name || "";
+  const name = inputName || loadedName || "";
+  return name ? name.split(" ")[0] : "[NAME]";
+}
+
+function personalize(text) {
+  return String(text || "").replaceAll("[NAME]", leadFirstName());
+}
+
+
+function formatDate(v) {
+  if (!v) return "";
+  try {
+    return new Date(v).toLocaleString();
+  } catch(e) {
+    return v;
+  }
+}
+
+
+function renderSetterSwitch() {
+  const panel = document.getElementById("setterSwitch");
+  if (!panel) return;
+
+  const setters = ["Marvin", "Oli", "Sascha"];
+
+  panel.innerHTML = setters.map(name => `
+    <button class="setter-btn ${activeSetter === name ? "active" : ""}" onclick="setActiveSetter('${name}')">
+      ${name}
+    </button>
+  `).join("");
+}
+
+async function setActiveSetter(name) {
+  activeSetter = name;
+  localStorage.setItem("lr_active_setter", name);
+  currentLead = null;
+  localStorage.removeItem("lr_crm_current_lead");
+  renderSetterSwitch();
+  await loadLeads();
+}
+
+async function loadLeads() {
+  const { data, error } = await supabaseClient
+    .from("leads")
+    .select("*")
+    .eq("setter", activeSetter)
+    .order("created_at", { ascending:false });
+
+  if (error) {
+    console.error(error);
+    document.getElementById("sideStatus").innerText = "Fehler beim Laden.";
+    return;
+  }
+
+  leads = data || [];
+  document.getElementById("sideStatus").innerText = leads.length + " Leads für " + activeSetter + " geladen.";
+  renderLeadList();
+
+  const remembered = localStorage.getItem("lr_crm_current_lead");
+  if (remembered && !currentLead) {
+    const found = leads.find(l => l.id === remembered);
+    if (found) selectLead(found.id);
+  } else if (!currentLead && leads.length) {
+    selectLead(leads[0].id);
+  } else {
+    renderMain();
+  }
+}
+
+function renderLeadList() {
+  const q = (document.getElementById("leadSearch")?.value || "").toLowerCase();
+  const list = document.getElementById("leadList");
+
+  const filtered = leads.filter(l => {
+    const hay = `${l.name || ""} ${l.setter || ""} ${l.status || ""} ${l.phone || ""}`.toLowerCase();
+    return hay.includes(q);
+  });
+
+  list.innerHTML = filtered.map(l => `
+    <button class="lead-btn ${currentLead?.id === l.id ? "active" : ""}" onclick="selectLead('${l.id}')">
+      ${safe(l.name || "Ohne Name")}
+      <small>${safe(l.status || "Setter")} · ${safe(l.setter || "kein Setter")}</small>
+    </button>
+  `).join("") || `<p class="muted">Keine Leads gefunden.</p>`;
+}
+
+function renderPhaseNav() {
+  document.getElementById("phaseNav").innerHTML = phases.map((p,i)=>`
+    <button class="phase-btn ${i===currentPhase ? "active" : ""}" onclick="goPhase(${i})">
+      ${safe(p.title)}
+    </button>
+  `).join("");
+}
+
+async function selectLead(id) {
+  const found = leads.find(l => l.id === id);
+  if (!found) return;
+  currentLead = found;
+  localStorage.setItem("lr_crm_current_lead", id);
+  renderLeadList();
+  renderPhaseNav();
+  renderObjections();
+  await renderMain();
+}
+
+function newLead() {
+  clearTimeout(autosaveTimer);
+  currentLead = null;
+  currentPhase = 0;
+  localStorage.removeItem("lr_crm_current_lead");
+  renderLeadList();
+  renderPhaseNav();
+  renderObjections();
+  renderMain();
+}
+
+async function createOrUpdateLead() {
+  const name = document.getElementById("leadName").value.trim();
+  const setter = activeSetter;
+  const phone = document.getElementById("phone").value.trim();
+  const email = document.getElementById("email")?.value.trim() || "";
+  const job_situation = document.getElementById("jobSituation")?.value.trim() || "";
+  const form_submitted_at = document.getElementById("formSubmittedAt")?.value.trim() || "";
+  const status = document.getElementById("status").value;
+  const appointment_at_raw = document.getElementById("appointmentAt").value;
+  const appointment_at = appointment_at_raw ? new Date(appointment_at_raw).toISOString() : null;
+
+  if (!name) {
+    alert("Lead Name fehlt.");
+    return;
+  }
+
+  if (!currentLead) {
+    const { data, error } = await supabaseClient
+      .from("leads")
+      .insert([{
+        name, setter, phone, email, job_situation, form_submitted_at, status, appointment_at,
+        updated_at:new Date().toISOString()
+      }])
+      .select()
+      .single();
+
+    if (error) {
+      console.error(error);
+      alert("Fehler beim Erstellen.");
+      return;
+    }
+
+    currentLead = data;
+    localStorage.setItem("lr_crm_current_lead", data.id);
+  } else {
+    const { data, error } = await supabaseClient
+      .from("leads")
+      .update({
+        name, setter, phone, email, job_situation, form_submitted_at, status, appointment_at,
+        updated_at:new Date().toISOString()
+      })
+      .eq("id", currentLead.id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error(error);
+      alert("Fehler beim Aktualisieren.");
+      return;
+    }
+
+    currentLead = data;
+  }
+
+  await loadLeads();
+  document.getElementById("saveStatus").innerText = "Lead gespeichert.";
+}
+
+async function getCurrentNote() {
+  if (!currentLead) return "";
+  const { data, error } = await supabaseClient
+    .from("lead_notes")
+    .select("note")
+    .eq("lead_id", currentLead.id)
+    .eq("phase_number", currentPhase)
+    .maybeSingle();
+
+  if (error) {
+    console.error(error);
+    return "";
+  }
+
+  return data?.note || "";
+}
+
+async function saveCurrentNote(options = {}) {
+  const silent = options.silent || false;
+
+  if (!currentLead) {
+    if (!silent) alert("Bitte zuerst Lead speichern.");
+    return false;
+  }
+
+  const noteEl = document.getElementById("phaseNote");
+  if (!noteEl) return true;
+
+  const note = noteEl.value;
+  const p = phases[currentPhase];
+
+  if (isSavingNote) return true;
+  isSavingNote = true;
+
+  const status = document.getElementById("saveStatus");
+  const hint = document.getElementById("autosaveHint");
+
+  if (hint) hint.innerText = "Speichert automatisch...";
+
+  const { error } = await supabaseClient
+    .from("lead_notes")
+    .upsert([{
+      lead_id:currentLead.id,
+      phase_number:currentPhase,
+      phase_title:p.title,
+      note,
+      updated_at:new Date().toISOString()
+    }], {
+      onConflict:"lead_id,phase_number"
+    });
+
+  isSavingNote = false;
+
+  if (error) {
+    console.error(error);
+    if (!silent) alert("Fehler beim Speichern der Notiz.");
+    if (hint) hint.innerText = "Auto-Save fehlgeschlagen.";
+    return false;
+  }
+
+  const time = new Date().toLocaleTimeString();
+  if (status) status.innerText = "Notiz gespeichert: " + time;
+  if (hint) hint.innerText = "Automatisch gespeichert: " + time;
+
+  return true;
+}
+
+function scheduleAutoSave() {
+  clearTimeout(autosaveTimer);
+
+  const hint = document.getElementById("autosaveHint");
+  if (hint) hint.innerText = "Änderung erkannt...";
+
+  autosaveTimer = setTimeout(async () => {
+    await saveCurrentNote({ silent:true });
+  }, 900);
+}
+
+async function saveAndNext() {
+  clearTimeout(autosaveTimer);
+  const ok = await saveCurrentNote();
+  if (ok && currentPhase < phases.length - 1) {
+    currentPhase++;
+    renderPhaseNav();
+    await renderMain();
+  }
+}
+
+async function copyNotes() {
+  if (!currentLead) {
+    alert("Noch kein Lead ausgewählt.");
+    return;
+  }
+
+  await saveCurrentNote();
+
+  const { data, error } = await supabaseClient
+    .from("lead_notes")
+    .select("*")
+    .eq("lead_id", currentLead.id)
+    .order("phase_number");
+
+  if (error) {
+    console.error(error);
+    alert("Notizen konnten nicht geladen werden.");
+    return;
+  }
+
+  let text = "CLOSER-ÜBERGABE\n";
+  text += "Lead: " + (currentLead.name || "") + "\n";
+  text += "Telefon: " + (currentLead.phone || "") + "\n";
+  text += "E-Mail: " + (currentLead.email || "") + "\n";
+  text += "Beruf/Situation: " + (currentLead.job_situation || "") + "\n";
+  text += "Formularzeitpunkt: " + (currentLead.form_submitted_at || "") + "\n";
+  text += "Setter: " + (currentLead.setter || "") + "\n";
+  text += "Status: " + (currentLead.status || "") + "\n";
+  text += "Termin: " + formatDate(currentLead.appointment_at) + "\n";
+  text += "Erstellt: " + formatDate(currentLead.created_at) + "\n\n";
+
+  if (!data || data.length === 0) {
+    text += "Keine Notizen gespeichert.";
+  } else {
+    data.forEach(item => {
+      if (item.note && item.note.trim()) {
+        text += item.phase_title + "\n";
+        text += item.note.trim() + "\n\n";
+      }
+    });
+  }
+
+  await navigator.clipboard.writeText(text);
+  alert("Closer-Übergabe kopiert.");
+}
+
+async function deleteCurrentLead() {
+  if (!currentLead) return;
+  const ok = confirm("Diesen Lead wirklich löschen? Alle Notizen dazu werden ebenfalls gelöscht.");
+  if (!ok) return;
+
+  const { error } = await supabaseClient
+    .from("leads")
+    .delete()
+    .eq("id", currentLead.id);
+
+  if (error) {
+    console.error(error);
+    alert("Löschen fehlgeschlagen.");
+    return;
+  }
+
+  currentLead = null;
+  localStorage.removeItem("lr_crm_current_lead");
+  await loadLeads();
+}
+
+async function goPhase(i) {
+  if (i === currentPhase) return;
+
+  clearTimeout(autosaveTimer);
+  await saveCurrentNote({ silent:true });
+
+  currentPhase = i;
+  renderPhaseNav();
+  renderObjections();
+  await renderMain();
+}
+
+async function renderMain() {
+  const p = phases[currentPhase];
+  let note = await getCurrentNote();
+  if ((!note || !note.trim()) && currentPhase === 2) {
+    note = importedInfoBlock();
+  }
+
+  const lead = currentLead || {
+    name:"",
+    setter:activeSetter,
+    phone:"",
+    email:"",
+    job_situation:"",
+    form_submitted_at:"",
+    status:"Setter",
+    appointment_at:null,
+    created_at:null
+  };
+
+  const appointmentLocal = lead.appointment_at
+    ? new Date(lead.appointment_at).toISOString().slice(0,16)
+    : "";
+
+  document.getElementById("main").innerHTML = `
+    <div class="card">
+      <h2>${currentLead ? "Lead bearbeiten" : "Neuen Lead anlegen"}</h2>
+      <div class="grid2">
+        <div>
+          <label>Lead Name</label>
+          <input id="leadName" value="${safe(lead.name)}" placeholder="z.B. Sarah / Kevin">
+        </div>
+        <div>
+          <label>Telefon</label>
+          <input id="phone" value="${safe(lead.phone)}" placeholder="+49...">
+        </div>
+      </div>
+
+      <br>
+
+      <div class="grid3">
+        <div>
+          <label>E-Mail</label>
+          <input id="email" value="${safe(lead.email)}" placeholder="name@email.de">
+        </div>
+        <div>
+          <label>Beruf / Situation</label>
+          <input id="jobSituation" value="${safe(lead.job_situation)}" placeholder="z.B. Elternzeit">
+        </div>
+        <div>
+          <label>Formularzeitpunkt</label>
+          <input id="formSubmittedAt" value="${safe(lead.form_submitted_at)}" placeholder="23.05.2026 05:20:49">
+        </div>
+      </div>
+
+      <br>
+
+      <div class="grid3">
+        <div>
+          <label>Setter</label>
+          <input id="setterName" value="${safe(activeSetter)}" readonly>
+        </div>
+        <div>
+          <label>Status</label>
+          <select id="status">
+            ${["Setter","Termin gebucht","Closing","Sold","Lost","Follow-up"].map(s => `
+              <option value="${s}" ${(lead.status || "Setter") === s ? "selected" : ""}>${s}</option>
+            `).join("")}
+          </select>
+        </div>
+        <div>
+          <label>Termin</label>
+          <input id="appointmentAt" type="datetime-local" value="${appointmentLocal}">
+        </div>
+      </div>
+
+      <br>
+
+      <div style="margin-top:16px; margin-bottom:14px;">
+        <label>Google-Sheet-Import</label>
+        <div class="flex">
+          <input id="sheetQuickImport" placeholder="Google-Sheet-Zeile hier einfügen..." style="flex:1; min-width:280px;">
+          <button class="secondary-btn" type="button" id="quickImportBtn">Übernehmen</button>
+        </div>
+        <div class="muted" style="font-size:12px;margin-top:6px;">Übernommen werden nur: Name, Telefon, E-Mail, Beruf/Situation, Formularzeitpunkt.</div>
+      </div>
+
+      <div class="flex">
+        <button class="main-btn" onclick="createOrUpdateLead()">Lead speichern</button>
+        <button class="secondary-btn" type="button" onclick="openWhatsAppFirstContact()">WA Erstkontakt</button>
+        
+        
+        <button class="secondary-btn" onclick="copyNotes()">Closer-Übergabe kopieren</button>
+        <button class="secondary-btn" onclick="showLeadOverview()">Lead-Übersicht</button>
+        <button class="secondary-btn" onclick="showTranscriptPopup()">Transkript</button>
+        ${currentLead ? '<button class="danger-btn" onclick="deleteCurrentLead()">Lead löschen</button>' : ''}
+      </div>
+
+      <div id="saveStatus" class="status-line">
+        ${currentLead ? "Aktueller Lead: " + safe(currentLead.name) : "Noch nicht gespeichert."}
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>${safe(p.title)}</h2>
+      <p>${safe(p.goal)}</p>
+    </div>
+
+    <div class="card">
+      <h3>Vorlesbarer Skriptblock</h3>
+      <div class="script">${safe(personalize(p.script))}</div>
+    </div>
+
+    ${p.paths && p.paths.length ? `
+    <div class="card">
+      <h3>Klick-Pfade</h3>
+      <div class="path-grid">
+        ${p.paths.map(path=>`
+          <div class="path ${safe(path.type)}">
+            <h4>${safe(path.label)}</h4>
+            <div class="script">${safe(personalize(path.text))}</div>
+          </div>
+        `).join("")}
+      </div>
+    </div>
+    ` : ""}
+<div class="card sticky-note-card">
+      <h3>Notizen für diese Phase</h3>
+      <textarea id="phaseNote" placeholder="Hier Notizen eintragen..." oninput="scheduleAutoSave()">${safe(note)}</textarea>
+      <div id="autosaveHint" class="autosave-hint">Auto-Save aktiv.</div>
+      <div class="flex" style="margin-top:10px;">
+        <button class="secondary-btn" onclick="goPhase(Math.max(0,currentPhase-1))">← Zurück</button>
+        <button class="main-btn" onclick="saveCurrentNote()">Notiz speichern</button>
+        <button class="main-btn" onclick="saveAndNext()">Speichern & weiter →</button>
+      </div>
+    </div>
+  `;
+}
+
+
+async function showLeadOverview() {
+  if (!currentLead) {
+    alert("Kein Lead ausgewählt.");
+    return;
+  }
+
+  const { data, error } = await supabaseClient
+    .from("lead_notes")
+    .select("*")
+    .eq("lead_id", currentLead.id)
+    .order("phase_number");
+
+  if (error) {
+    console.error(error);
+    alert("Übersicht konnte nicht geladen werden.");
+    return;
+  }
+
+
+  const transcriptHtml = transcript && transcript.trim()
+    ? `<div class="card">
+        <h3>Sipgate Gesprächstranskript</h3>
+        <div class="script">${safe(transcript)}</div>
+      </div>`
+    : `<div class="card">
+        <h3>Sipgate Gesprächstranskript</h3>
+        <div class="script">Kein Transkript gespeichert.</div>
+      </div>`;
+
+  const notesHtml = data.map(item => `
+    <div class="card">
+      <h3>${safe(item.phase_title)}</h3>
+      <div class="script">${safe(item.note || "Keine Notiz.")}</div>
+    </div>
+  `).join("");
+
+  const popup = document.createElement("div");
+  popup.id = "overviewPopup";
+  popup.style.position = "fixed";
+  popup.style.inset = "0";
+  popup.style.background = "rgba(0,0,0,.82)";
+  popup.style.zIndex = "9999";
+  popup.style.overflowY = "auto";
+  popup.style.padding = "40px";
+
+  popup.innerHTML = `
+    <div style="max-width:1100px;margin:auto;">
+      <div class="card">
+        <div class="flex" style="justify-content:space-between;">
+          <div>
+            <h2>${safe(currentLead.name || "Lead")}</h2>
+            <div class="muted">
+              ${safe(currentLead.status || "")} ·
+              ${safe(currentLead.setter || "")}
+            </div>
+          </div>
+
+          <button class="danger-btn" onclick="document.getElementById('overviewPopup').remove()">
+            Schließen
+          </button>
+        </div>
+      </div>
+
+      ${transcriptHtml}
+      ${notesHtml || '<div class="card">Keine Notizen vorhanden.</div>'}
+    </div>
+  `;
+
+  document.body.appendChild(popup);
+}
+
+
+
+async function loadTranscript() {
+  if (!currentLead) return "";
+
+  const { data, error } = await supabaseClient
+    .from("lead_transcripts")
+    .select("*")
+    .eq("lead_id", currentLead.id)
+    .order("updated_at", { ascending:false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    console.error(error);
+    return "";
+  }
+
+  return data?.transcript_text || "";
+}
+
+async function saveTranscript() {
+  if (!currentLead) {
+    alert("Bitte zuerst Lead speichern.");
+    return;
+  }
+
+  const text = document.getElementById("transcriptText")?.value || "";
+
+  const { data: existing } = await supabaseClient
+    .from("lead_transcripts")
+    .select("id")
+    .eq("lead_id", currentLead.id)
+    .limit(1)
+    .maybeSingle();
+
+  let error;
+
+  if (existing?.id) {
+    const result = await supabaseClient
+      .from("lead_transcripts")
+      .update({
+        transcript_text: text,
+        source: "sipgate",
+        updated_at: new Date().toISOString()
+      })
+      .eq("id", existing.id);
+
+    error = result.error;
+  } else {
+    const result = await supabaseClient
+      .from("lead_transcripts")
+      .insert([{
+        lead_id: currentLead.id,
+        transcript_text: text,
+        source: "sipgate",
+        updated_at: new Date().toISOString()
+      }]);
+
+    error = result.error;
+  }
+
+  if (error) {
+    console.error(error);
+    alert("Transkript konnte nicht gespeichert werden.");
+    return;
+  }
+
+  document.getElementById("saveStatus").innerText = "Transkript gespeichert: " + new Date().toLocaleTimeString();
+}
+
+function handleTranscriptFile(input) {
+  const file = input.files?.[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+
+  reader.onload = function(e) {
+    const text = e.target.result || "";
+    document.getElementById("transcriptText").value = text;
+  };
+
+  reader.readAsText(file, "UTF-8");
+}
+
+async function copyTranscript() {
+  if (!currentLead) {
+    alert("Kein Lead ausgewählt.");
+    return;
+  }
+
+  const text = document.getElementById("transcriptText")?.value || await loadTranscript();
+
+  if (!text.trim()) {
+    alert("Kein Transkript vorhanden.");
+    return;
+  }
+
+  await navigator.clipboard.writeText(text);
+  alert("Transkript kopiert.");
+}
+
+
+async function showTranscriptPopup() {
+  if (!currentLead) {
+    alert("Bitte zuerst Lead auswählen oder speichern.");
+    return;
+  }
+
+  const transcript = await loadTranscript();
+
+  const popup = document.createElement("div");
+  popup.id = "transcriptPopup";
+  popup.style.position = "fixed";
+  popup.style.inset = "0";
+  popup.style.background = "rgba(0,0,0,.82)";
+  popup.style.zIndex = "9999";
+  popup.style.overflowY = "auto";
+  popup.style.padding = "40px";
+
+  popup.innerHTML = `
+    <div style="max-width:1000px;margin:auto;">
+      <div class="card">
+        <div class="flex" style="justify-content:space-between;">
+          <div>
+            <h2>Sipgate Gesprächstranskript</h2>
+            <div class="muted">${safe(currentLead.name || "Lead")}</div>
+          </div>
+          <button class="danger-btn" onclick="document.getElementById('transcriptPopup').remove()">Schließen</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <p class="muted">Transkript hier einfügen oder als .txt hochladen. Es wird pro Lead in Supabase gespeichert.</p>
+
+        <div class="flex" style="margin-bottom:14px;">
+          <input type="file" accept=".txt,.text" onchange="handleTranscriptFile(this)" style="max-width:340px;">
+          <button class="main-btn" onclick="saveTranscript()">Transkript speichern</button>
+          <button class="secondary-btn" onclick="copyTranscript()">Transkript kopieren</button>
+        </div>
+
+        <textarea id="transcriptText" placeholder="Sipgate-Transkript hier einfügen...">${safe(transcript)}</textarea>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(popup);
+}
+
+
+
+function applySheetImportFromQuickField() {
+  const raw = document.getElementById("sheetQuickImport")?.value || "";
+  const cols = raw.split("\t");
+
+  if (cols.length < 5) {
+    alert("Die Zeile wurde nicht erkannt. Bitte direkt aus Google Sheets eine komplette Zeile kopieren.");
+    return;
+  }
+
+  const formSubmittedAt = (cols[0] || "").trim();
+  const name = (cols[1] || "").trim();
+  const email = (cols[3] || "").trim();
+  const phone = (cols[4] || "").trim();
+  const jobSituation = (cols[5] || "").trim();
+
+  const setVal = (id, val) => {
+    const el = document.getElementById(id);
+    if (el) el.value = val || "";
+  };
+
+  setVal("leadName", name);
+  setVal("phone", phone);
+  setVal("email", email);
+  setVal("jobSituation", jobSituation);
+  setVal("formSubmittedAt", formSubmittedAt);
+
+  const importInput = document.getElementById("sheetQuickImport");
+  if (importInput) importInput.value = "";
+
+  alert("Datensatz übernommen. Jetzt Lead speichern.");
+}
+
+document.addEventListener("click", function(event) {
+  const btn = event.target.closest("#quickImportBtn");
+  if (!btn) return;
+  event.preventDefault();
+  applySheetImportFromQuickField();
+});
+
+
+
+function normalizePhoneForWhatsApp(phone) {
+  let digits = String(phone || "").replace(/\D/g, "");
+  if (!digits) return "";
+  if (digits.startsWith("00")) digits = digits.slice(2);
+  if (digits.startsWith("0")) digits = "49" + digits.slice(1);
+  return digits;
+}
+
+function buildFirstContactMessage() {
+  const name = leadFirstName();
+  const setter = setterNameForText();
+
+  return `Hey ${name}, ${setter} hier aus dem Love Repair Team von Florian.
+
+Du hattest dich ja für einen Platz in Florians persönlicher Ex-Zurück-Begleitung beworben.
+
+Bei uns ist die Vorgehensweise so, dass wir deine/n Ex von selbst dazu bringen, sich einen Neuanfang mit dir zu wünschen — ohne dass du hinterherrennen oder dich verbiegen musst.
+
+Hast du gerade kurz ein paar Minuten Zeit? Dann würde ich dir ein paar Fragen stellen, um herauszufinden, ob wir dir in deiner Situation weiterhelfen können.`;
+}
+
+function openWhatsAppFirstContact() {
+  const phoneInput = document.getElementById("phone")?.value?.trim();
+  const phone = phoneInput || currentLead?.phone || "";
+  const normalizedPhone = normalizePhoneForWhatsApp(phone);
+
+  if (!normalizedPhone) {
+    alert("Telefonnummer fehlt.");
+    return;
+  }
+
+  const message = buildFirstContactMessage();
+  const url = `https://wa.me/${normalizedPhone}?text=${encodeURIComponent(message)}`;
+  window.open(url, "_blank");
+}
+
+
+renderPhaseNav();
+renderObjections();
+renderGlobalTools();
+renderSetterSwitch();
+loadLeads();
+</script>
+</body>
+</html>
